@@ -1,0 +1,107 @@
+:root {
+    --primary-color: #ffffff;
+    --secondary-color: rgb(0, 115, 255);
+    --border-color: black;
+}
+
+.appbar {
+    padding: 0.5%;
+    display: flex;
+    justify-content: space-between;
+    height: fit-content;
+}
+
+.logo{
+    margin: auto 0;
+    width: 15rem;
+}
+
+.tools-section {
+    display: flex;
+    background-color: rgb(193, 255, 249);
+    border-radius: 0.6rem;
+    margin: auto 1%;
+}
+
+.tool {
+    width: 40px;
+    height: 40px;
+    background: inherit;
+    border: none;
+    border-radius: 20%;
+    margin: 0.3em;
+}
+
+.tool:hover {
+    background: var(--secondary-color);
+    cursor: pointer;
+}
+
+.redo{
+    transform: scaleX(-1);
+}
+
+.hamburger {
+    width: 40px;
+    height: 40px;
+    background: inherit;
+    border: none;
+    border-radius: 20%;
+    margin: 0.3em;
+}
+
+.hamburger:hover {
+    cursor: pointer;
+}
+
+.color-picker {
+    height: 90%;
+    width: 90%;
+    border-radius: 20%;
+}
+
+.undoRedo {
+    margin-left: auto;
+}
+
+.partition {
+    border: 1px solid var(--border-color);
+    height: 2em;
+    margin: auto;
+}
+
+select {
+    font-size: 1em;
+    color: var(--border-color);
+}
+
+.tool-box {
+    margin-right: auto;
+}
+
+.selected{
+    background: rgb(84, 145, 169);
+}
+
+@media only screen and (max-width: 1000px) {
+    .tool-box{
+        position: fixed;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+}
+
+@media only screen and (max-width: 500px) {
+    .logo{
+        width:40%;
+        margin-left: 0.5em;
+    }
+    .appbar{
+        /* border-bottom: 1px solid var(--border-color); */
+        padding-top: 2%;
+    }
+    .tool:hover{
+        background: rgb(84, 145, 169);
+    }
+}
