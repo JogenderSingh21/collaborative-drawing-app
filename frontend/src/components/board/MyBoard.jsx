@@ -59,20 +59,27 @@ function MyBoard(props) {
 
     function drawStart(currentX, currentY, width, context, isEraser) {
         var color = props.color;
-        var w = width;
         if(isEraser){
-            color = "white";
-            w = 60; // Eraser - mne hi set kri hai 
+            color = props.bcolor;
+            // Eraser - mne hi set kri hai
+            drawLineTool(prevPointRef.current, { x: currentX, y: currentY }, context, color, 60);
+            drawingElementsRef.current.push({
+                type: 'lineToolE',
+                start: prevPointRef.current,
+                end: { x: currentX, y: currentY },
+                width: 60,
+            }); 
         }
-
-        drawLineTool(prevPointRef.current, { x: currentX, y: currentY }, context, color, w);
-        drawingElementsRef.current.push({
-            type: 'lineTool',
-            start: prevPointRef.current,
-            end: { x: currentX, y: currentY },
-            color: color,
-            width: w,
-        });
+        else{
+            drawLineTool(prevPointRef.current, { x: currentX, y: currentY }, context, color, width);
+            drawingElementsRef.current.push({
+                type: 'lineTool',
+                start: prevPointRef.current,
+                end: { x: currentX, y: currentY },
+                color: color,
+                width: width,
+            });
+        }   
     }
 
     function drawCircleTool(start, end, context, color, width){
@@ -133,12 +140,19 @@ function MyBoard(props) {
                 props.setUndoRedo(null);
             }
         } else if(props.undoRedo == 'redo'){
-            console.log(redoDrawingElements.current);
             if(redoDrawingElements.current.length != 0){
                 drawingElementsRef.current.push(redoDrawingElements.current.pop())
                 props.setUndoRedo(null);
             }
         }
+
+        if(props.clearBoard){
+            drawingElementsRef.current = [];
+            redoDrawingElements.current = [];
+            props.setClearBoard(false);
+        }
+
+        canvasRef.current.style.backgroundColor = props.bcolor;
 
         // Redraw
         try {
@@ -150,29 +164,28 @@ function MyBoard(props) {
                 } else if(element.type === 'rectangle'){
                     drawRectangle(element.start, element.end, ctx, element.color, element.width);
                 } else if(element.type === 'dot'){
-                    drawCircle(element.center, element.radius, ctx, element.color)
-                } 
-                else if (element.type === 'pencilStroke') {
+                    drawCircle(element.center, element.radius, ctx, props.bcolor)
+                } else if (element.type === 'pencilStroke') {
                     drawPencilStroke(element.points, ctx, element.color, element.width);
+                } else if(element.type === 'lineToolE'){
+                    drawLineTool(element.start, element.end, ctx, props.bcolor, element.width);
                 }
             });
         } catch (error) {
             console.log("Nothing to do");
         }
-    }, [props.undoRedo]);
+    }, [props.undoRedo, props.bcolor, props.clearBoard]);
 
     const handleMouseDown = (e) => {
         setIsDrawing(true);
         const { x, y, context } = getMousePoints(e);
-        console.log("jojo")
         if(props.tool === "eraser"){
             // Eraser memory - ye bhi mne hi kra hai - change mt kriyo bkl
-            drawCircle({ x, y }, 30, context, 'white');
+            drawCircle({ x, y }, 30, context, props.bcolor);
             drawingElementsRef.current.push({
                 type: 'dot',
                 center: {x,y},
                 radius: 30,
-                color: 'white'
             });
         } else if(props.tool === 'pencil'){
             // Unique ID
@@ -209,7 +222,7 @@ function MyBoard(props) {
 
             // Clear
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-
+            
             // Redraw
             drawingElementsRef.current.forEach((element) => {
                 if (element.type === 'lineTool') {
@@ -219,10 +232,11 @@ function MyBoard(props) {
                 } else if(element.type === 'rectangle'){
                     drawRectangle(element.start, element.end, ctx, element.color, element.width);
                 } else if(element.type === 'dot'){
-                    drawCircle(element.center, element.radius, ctx, element.color)
-                }
-                else if (element.type === 'pencilStroke') {
+                    drawCircle(element.center, element.radius, ctx, props.bcolor)
+                } else if (element.type === 'pencilStroke') {
                     drawPencilStroke(element.points, ctx, element.color, element.width);
+                } else if(element.type === 'lineToolE'){
+                    drawLineTool(element.start, element.end, ctx, props.bcolor, element.width);
                 }
             });
 

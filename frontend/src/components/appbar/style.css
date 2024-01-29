@@ -83,7 +83,7 @@ select {
     background: rgb(84, 145, 169);
 }
 
-@media only screen and (max-width: 1000px) {
+@media only screen and (max-width: 800px) {
     .tool-box{
         position: fixed;
         bottom: 0;
@@ -104,4 +104,71 @@ select {
     .tool:hover{
         background: rgb(84, 145, 169);
     }
+    .clearBoard:hover{
+        background: none;
+        cursor: pointer;
+    }
+    
+}
+
+.ham{
+    position: absolute;
+    right: 0;
+    margin: 10px;
+    margin: 45px 1.5%;
+    align-items: flex-end;
+    display: flex;
+    flex-direction: column;
+}
+
+  
+.ham-menu {
+    max-height: 0;
+    width: 100px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column; 
+    background-color: rgb(193, 255, 249);
+    margin-top: 10px;
+    border-radius: 10px;
+    padding: 5px;
+    opacity: 0;
+    transition: max-height 0.3s ease, opacity 0.3s ease;
+}
+  
+.open {
+    max-height: 200px;
+    opacity: 1;
+}
+
+.live{
+    background: rgb(214, 71, 71);
+    border-radius: 10px;
+    padding: 4px;
+    margin-bottom: 5px;
+    /* margin-top: 10px; */
+}
+
+.live:hover{
+    background-color: red;
+    cursor: pointer;
+}
+
+
+.clearBoard{
+    background-color: inherit;
+    border-radius: 10px;
+    padding: 4px;
+    font-weight: bold;
+    margin-top: 5px;
+}
+
+.clearBoard:hover{
+    background: rgb(193, 255, 249);
+    cursor: pointer;
+}
+
+.v-partition{
+    border: 1px solid grey;
+    margin: 10px 0;
 }
