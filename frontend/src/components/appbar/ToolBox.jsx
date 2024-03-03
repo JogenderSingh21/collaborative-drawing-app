@@ -55,7 +55,7 @@ export function ToolBox({ strokesize, setSize, strokecolor, setColor, setTool, t
             <button className='tool'>
                 <input className='color-picker' type="color" value={strokecolor} onChange={handleColorChange} />
             </button>
-            <select name="strokesize" id="strokesize" className='hamburger' value={strokesize} onChange={handleChangeSize}>
+            <select name="strokesize" id="strokesize" className='hamburger text-md font-semibold' value={strokesize} onChange={handleChangeSize}>
                 <option value="5" className='options'>5</option>
                 <option value="10" className='options'>10</option>
                 <option value="15" className='options'>15</option>

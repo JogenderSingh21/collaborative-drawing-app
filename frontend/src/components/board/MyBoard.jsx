@@ -1,4 +1,8 @@
-import { useState, useLayoutEffect, useRef, useEffect } from 'react';
+import { useState, useLayoutEffect, useRef } from 'react';
+import { Saved } from '../Saved';
+import axios from "axios";
+import { useParams } from 'react-router-dom';
+import { Spinner } from "../Spinner"
 
 function MyBoard(props) {
     const [isDrawing, setIsDrawing] = useState(false);
@@ -9,7 +13,86 @@ function MyBoard(props) {
     const circlePointsRef = useRef(null);
     const rectPointsRef = useRef(null);
     const drawingElementsRef = useRef([]);
-    const redoDrawingElements = useRef([])
+    const redoDrawingElements = useRef([]);
+    const [saved, setSaved] = useState(true);
+    const [imgg, setImgg] = useState("");
+    const [spin, setSpin] = useState(false);
+    
+    const { RoomID } = useParams();
+
+    useLayoutEffect(() => {
+        console.log("useEffect");
+        setSpin(true);
+        const uri = "http://localhost:3000/api/v1/drawing/" + RoomID;
+        axios.get(uri.toString(), {
+            headers: {
+                Authorization: "Bearer " + localStorage.getItem("token")
+            }
+        }).then(response => {
+            console.log(response.data);
+            drawingElementsRef.current = response.data.drawing.elementsArray;
+            redrawCanvas();
+            setSpin(false);
+        }).catch(error => {
+            console.log(error.response);
+        })
+
+        document.addEventListener('keydown', e => {
+            if (e.ctrlKey && e.key === 's') {
+                e.preventDefault();
+                console.log('CTRL + S');
+                
+                const base64Canvas = canvasRef.current.toDataURL("image/jpeg", 1.0);
+                setImgg(base64Canvas);
+
+                console.log(drawingElementsRef.current);
+                
+                axios.put("http://localhost:3000/api/v1/drawing/updateInfo", {
+                    imgId: RoomID,
+                    elementsArray: drawingElementsRef.current,
+                    image: base64Canvas
+                },{
+                    headers: {
+                        Authorization: "Bearer " + localStorage.getItem("token")
+                    }
+                });            
+
+                setSaved(false);
+                setTimeout(() => {
+                    setSaved(true);
+                }, 1000);
+            }
+          });
+    }, []);
+
+    const redrawCanvas = () => {
+        // Trigger redraw logic here
+        const canvas = canvasRef.current;
+        const ctx = canvas.getContext('2d');
+    
+        // Clear the canvas
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+        // Redraw elements from drawingElementsRef
+        drawingElementsRef.current.forEach((element) => {
+            if (element.type === 'lineTool') {
+                drawLineTool(element.start, element.end, ctx, element.color, element.width);
+            } else if(element.type === 'circleTool'){
+                drawCircleTool(element.start, element.end, ctx, element.color, element.width);
+            } else if(element.type === 'rectangle'){
+                drawRectangle(element.start, element.end, ctx, element.color, element.width);
+            } else if(element.type === 'dot'){
+                drawCircle(element.center, element.radius, ctx, "white")
+            } else if (element.type === 'pencilStroke') {
+                drawPencilStroke(element.points, ctx, element.color, element.width);
+            } else if(element.type === 'lineToolE'){
+                drawLineTool(element.start, element.end, ctx, "white", element.width);
+            }
+        });
+    };
 
     function getMousePoints(e) {
         const rect = canvasRef.current.getBoundingClientRect();
@@ -32,7 +115,7 @@ function MyBoard(props) {
 
         const strokeId = currentPencilStroke;
 
-        // Find the current pencil stroke in drawingElementsRef and update it
+        // Find the current pencil stroke in drawingElementsRef.currentRef and update it
         const pencilStroke = drawingElementsRef.current.find(
             (element) => element.type === 'pencilStroke' && element.id === strokeId
         );
@@ -60,7 +143,7 @@ function MyBoard(props) {
     function drawStart(currentX, currentY, width, context, isEraser) {
         var color = props.color;
         if(isEraser){
-            color = props.bcolor;
+            color = "white";
             // Eraser - mne hi set kri hai
             drawLineTool(prevPointRef.current, { x: currentX, y: currentY }, context, color, 60);
             drawingElementsRef.current.push({
@@ -128,9 +211,14 @@ function MyBoard(props) {
     }
 
     useLayoutEffect(() => {
+        console.log("layouteffect2");
         const canvas = canvasRef.current;
         const ctx = canvas.getContext('2d');
+
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
 
         canvas.addEventListener("touchmove", (e) => { e.preventDefault() }, false);
 
@@ -152,8 +240,6 @@ function MyBoard(props) {
             props.setClearBoard(false);
         }
 
-        canvasRef.current.style.backgroundColor = props.bcolor;
-
         // Redraw
         try {
             drawingElementsRef.current.forEach((element) => {
@@ -164,24 +250,26 @@ function MyBoard(props) {
                 } else if(element.type === 'rectangle'){
                     drawRectangle(element.start, element.end, ctx, element.color, element.width);
                 } else if(element.type === 'dot'){
-                    drawCircle(element.center, element.radius, ctx, props.bcolor)
+                    drawCircle(element.center, element.radius, ctx, "white")
                 } else if (element.type === 'pencilStroke') {
                     drawPencilStroke(element.points, ctx, element.color, element.width);
                 } else if(element.type === 'lineToolE'){
-                    drawLineTool(element.start, element.end, ctx, props.bcolor, element.width);
+                    drawLineTool(element.start, element.end, ctx, "white", element.width);
                 }
             });
+            console.log("redraw complete")
+
         } catch (error) {
             console.log("Nothing to do");
         }
-    }, [props.undoRedo, props.bcolor, props.clearBoard]);
+    }, [props.undoRedo, props.clearBoard]);
 
     const handleMouseDown = (e) => {
         setIsDrawing(true);
         const { x, y, context } = getMousePoints(e);
         if(props.tool === "eraser"){
             // Eraser memory - ye bhi mne hi kra hai - change mt kriyo bkl
-            drawCircle({ x, y }, 30, context, props.bcolor);
+            drawCircle({ x, y }, 30, context, "white");
             drawingElementsRef.current.push({
                 type: 'dot',
                 center: {x,y},
@@ -222,6 +310,8 @@ function MyBoard(props) {
 
             // Clear
             ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
             
             // Redraw
             drawingElementsRef.current.forEach((element) => {
@@ -232,11 +322,11 @@ function MyBoard(props) {
                 } else if(element.type === 'rectangle'){
                     drawRectangle(element.start, element.end, ctx, element.color, element.width);
                 } else if(element.type === 'dot'){
-                    drawCircle(element.center, element.radius, ctx, props.bcolor)
+                    drawCircle(element.center, element.radius, ctx, "white")
                 } else if (element.type === 'pencilStroke') {
                     drawPencilStroke(element.points, ctx, element.color, element.width);
                 } else if(element.type === 'lineToolE'){
-                    drawLineTool(element.start, element.end, ctx, props.bcolor, element.width);
+                    drawLineTool(element.start, element.end, ctx, "white", element.width);
                 }
             });
 
@@ -293,8 +383,9 @@ function MyBoard(props) {
         setCurrentPencilStroke(null);
     };
 
-    return (
+    return (<>
         <canvas
+            className='bg-white'
             width={window.innerWidth}
             height={window.innerHeight}
             onPointerDown={handleMouseDown}
@@ -304,6 +395,14 @@ function MyBoard(props) {
         >
             Canvas
         </canvas>
+        <div className='fixed right-0 bottom-0' hidden={saved}>
+            <Saved></Saved>
+            <img className='h-32' src={imgg} alt='image' />
+        </div>
+        <div hidden={!spin}>
+            <Spinner></Spinner>
+        </div>
+    </>
     );
 }
 

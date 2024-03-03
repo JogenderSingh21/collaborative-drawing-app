@@ -1,7 +1,7 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Appbar } from '../appbar/Appbar'
-import './style.css'
 import MyBoard from '../board/MyBoard';
+
 
 export function Container(){
 
@@ -10,9 +10,9 @@ export function Container(){
     const [currentTool, setCurrentTool] = useState('pencil');
     const [undoRedo, setUndoRedo] = useState(null);
     const [clearBoard, setClearBoard] = useState(false);
-    const [bcolor, setBcolor] = useState("#ffffff")
+    const [bcolor, setBcolor] = useState("#ffffff");
 
-    return <div className="container">
+    return <div className="fixed w-full h-full bg-white">
         <Appbar 
             strokesize={strokesize} 
             setSize={setSize} 
@@ -25,7 +25,7 @@ export function Container(){
             setBcolor={setBcolor}
             setClearBoard={setClearBoard}
         ></Appbar>
-        <div className="board-container">
+        <div className="board-container w-full h-full m-auto">
             <MyBoard 
                 tool={currentTool} 
                 color={strokecolor} 
@@ -37,5 +37,8 @@ export function Container(){
                 setClearBoard={setClearBoard}
             />
         </div>
+        {/* <div className='fixed right-0 bottom-0' hidden={saved}>
+            <Saved></Saved>
+        </div> */}
     </div>
 }

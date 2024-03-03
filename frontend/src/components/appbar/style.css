@@ -4,18 +4,6 @@
     --border-color: black;
 }
 
-.appbar {
-    padding: 0.5%;
-    display: flex;
-    justify-content: space-between;
-    height: fit-content;
-}
-
-.logo{
-    margin: auto 0;
-    width: 15rem;
-}
-
 .tools-section {
     display: flex;
     background-color: rgb(193, 255, 249);
@@ -30,6 +18,9 @@
     border: none;
     border-radius: 20%;
     margin: 0.3em;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .tool:hover {
@@ -113,9 +104,9 @@ select {
 
 .ham{
     position: absolute;
-    right: 0;
+    right: 1.25rem;
     margin: 10px;
-    margin: 45px 1.5%;
+    margin: 45px 0;
     align-items: flex-end;
     display: flex;
     flex-direction: column;
@@ -124,7 +115,6 @@ select {
   
 .ham-menu {
     max-height: 0;
-    width: 100px;
     overflow: hidden;
     display: flex;
     flex-direction: column; 
